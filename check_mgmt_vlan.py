@@ -37,7 +37,7 @@ def check_mgmt_vlan_by_source(username, password, list_of_ips):
 
         device_dict = {
             "ip": ip,
-            "svlan": vlan
+            "svlan": vlan.group()
         }
 
         print(template.render(device=device_dict))
