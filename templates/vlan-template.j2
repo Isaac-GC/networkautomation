@@ -1,0 +1,10 @@
+interface vlan {{ template_var.number }}
+  ip address {{ template_var.address }} {{ template_var.subnet }}
+  description {{ template_var.name }}
+  no shut
+exit
+
+vlan {{ template_var.number }}
+  name {{ template_var.name }}
+exit
+

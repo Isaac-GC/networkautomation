@@ -1,0 +1,5 @@
+textfsm
+PyYAML
+setuptools
+netmiko
+Jinja2

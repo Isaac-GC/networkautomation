@@ -1,0 +1,9 @@
+
+interface vlan {{ vlan.number }}
+  ip address {{ vlan.address }} {{ vlan.subnet }}
+  description {{ vlan.name }}
+exit
+
+vlan {{ vlan.number }}
+  name {{ vlan.name }}
+exit
