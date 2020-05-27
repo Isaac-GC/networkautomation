@@ -4,7 +4,8 @@ import re
 
 from getpass import getpass
 
-from configparser import ConfigParser
+import yaml
+
 from netmiko.cisco import CiscoIosSSH
 from jinja2 import Template
 
@@ -41,9 +42,14 @@ def check_mgmt_vlan_by_source(username, password, list_of_ips):
 
         print(template.render(device=device_dict))
 
-config = ConfigParser()
-config.read('hosts')
-idaho_vtp = config['VTPIdaho']
+idaho_vtp = []
+
+with open('hosts.yml', 'r') as yfile:
+    dictionary = yaml.load(yfile, Loader=yaml.Loader)
+
+    [ idaho_vtp.append(host) for host in dictionary['all']['children']['Gowen']['children']['VTPIdaho']['hosts'].keys() ]
+
+
 
 username = str(input("Please enter your username: "))
 password = getpass()
