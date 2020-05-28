@@ -3,14 +3,19 @@
 import csv
 import socket
 import struct
+import yaml
 from getpass import getpass
 
 from netmiko.cisco import CiscoIosSSH
 from jinja2 import Environment, FileSystemLoader
 
-username='cisco'
-password='cisco'
-host='10.0.2.144'
+username = 'cisco'
+password = 'cisco'
+host = '10.0.2.144'
+
+# TODO
+# - Create a function that outputs a number list menu
+# - Move important functions to a utility file to be easily referenced
 
 
 def cidr_to_netmask(net_bits):
@@ -20,7 +25,6 @@ def cidr_to_netmask(net_bits):
 
 
 def apply_template(template_dir, template_name, var_dict):
-
     # get template directory
     env = Environment(loader=FileSystemLoader(template_dir))
 
@@ -35,7 +39,6 @@ def apply_template(template_dir, template_name, var_dict):
 
 
 def backup_running_config(hostname, username, password):
-
     net_connect = CiscoIosSSH(
         host=hostname,
         username=username,
@@ -59,14 +62,12 @@ def backup_running_config(hostname, username, password):
 
 
 def apply_config_to_networkdevice(hostname, username, password, config):
-
     net_connect = CiscoIosSSH(
         host=hostname,
         username=username,
         password=password,
         device_type='cisco_ios'
     )
-
 
     print("\n####################################################\n\nConnected to {"
           "}\n####################################################\n".format(host))
@@ -100,34 +101,31 @@ def apply_config_to_networkdevice(hostname, username, password, config):
     print("\n####################################################\n")
 
 
-
-
-
-
 try:
-    with open('voice_vlan.csv') as csvfile:
-        voice_vlans = csv.DictReader(csvfile)
+    while True:
+        print("\n")
+        vtp_csv_file = str(input("Please enter the csv file to open: "))
 
-        csv_config = ""
-        for vlan in voice_vlans:
-            # print("name: {}\n    number: {}\n    gateway: {}\n    subnet: {}\n".format(
-            #     vlan['name'],
-            #     vlan['number'],
-            #     vlan['address'],
-            #     cidr_to_netmask(vlan['subnet'])
-            # ))
-            vlan['subnet'] = cidr_to_netmask(vlan['subnet'])
+        try:
+            vtp_csv_content = open(vtp_csv_file, 'r') # open up the selected csv file for read
+            break
+        except FileNotFoundError as e:
+            print(e)
 
-            csv_config += apply_template('templates', 'vlan-template.j2', vlan)
+    csv_config = ""
+    for vlan in vtp_csv_content:
+        vlan['subnet'] = cidr_to_netmask(vlan['subnet'])  # convert cidr (/24) to netmask (255.255.255.0)
+        csv_config += apply_template('templates', 'vlan-template.j2', vlan)
 
-            # print(base_vlan_config.render(vlan=vlan))
+        # print(base_vlan_config.render(vlan=vlan))
 
     host = str(input("Please enter the hostname or ip of the network device: "))
     username = str(input("Please enter your username: "))
     password = getpass()
     apply_config_to_networkdevice(host, username, password, csv_config)
 
-    print('Done with all/any configuration')
+    vtp_csv_content.close()  # Close file to clean stuffs up
+    print('Done with all/any configuration')  # Output the status that its done
 
-except FileNotFoundError as e:
+except RuntimeError as e:
     print(e)
