@@ -50,9 +50,9 @@ try:
         except FileNotFoundError as e:
             print(e)
 
+    username = str(input("Please enter your username: "))
+    password = getpass()
     for host in csv.reader(host_csv, delimiter=','):
-        username = str(input("Please enter your username: "))
-        password = getpass()
         reset_power_all_remote(host[0], username, password)
 
     host_csv.close()  # Close file to clean stuffs up
